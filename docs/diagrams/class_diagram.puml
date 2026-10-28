@@ -1,0 +1,185 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class User {
+  - id: String
+  - email: String
+  - name: String
+  - passwordHash: String
+  - role: UserRole
+  - createdAt: DateTime
+  + register(name, email, pass): User
+  + verifyCredentials(pass): Boolean
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+class Scenario {
+  - id: String
+  - slug: String
+  - title: String
+  - category: String
+  - difficulty: ScenarioDifficulty
+  - estimatedMinutes: Integer
+  - description: String
+  - status: ScenarioStatus
+  - currentVersionId: String
+  + publish(): Void
+  + archive(): Void
+}
+
+enum ScenarioStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ScenarioDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+class ScenarioVersion {
+  - id: String
+  - scenarioId: String
+  - versionNumber: Integer
+  - initialSceneId: String
+  - passingScore: Integer
+  - isPublished: Boolean
+}
+
+class Scene {
+  - id: String
+  - versionId: String
+  - sceneKey: String
+  - title: String
+  - senderName: String
+  - senderAddress: String
+  - subject: String
+  - timestampLabel: String
+  - bodyContent: String
+  - channelType: ChannelType
+  - isTerminal: Boolean
+  - terminalOutcomeType: OutcomeType
+  - terminalExplanation: String
+  + isEnding(): Boolean
+}
+
+class Choice {
+  - id: String
+  - versionId: String
+  - fromSceneId: String
+  - nextSceneId: String
+  - choiceKey: String
+  - label: String
+  - description: String
+  - qualityScore: Integer
+  - feedbackText: String
+  - isOptimal: Boolean
+}
+
+class Evidence {
+  - id: String
+  - versionId: String
+  - sceneId: String
+  - clueKey: String
+  - label: String
+  - description: String
+  - category: ClueCategory
+  - isLegitimate: Boolean
+  - explanation: String
+  - scorePoints: Integer
+}
+
+class Attempt {
+  - id: String
+  - userId: String
+  - scenarioId: String
+  - versionId: String
+  - currentSceneId: String
+  - status: AttemptStatus
+  - confidenceRating: Integer
+  - decisionScore: Float
+  - evidenceScore: Float
+  - totalScore: Float
+  - isReplay: Boolean
+  - parentAttemptId: String
+  - startedAt: DateTime
+  - completedAt: DateTime
+  + submitDecision(choiceId, conf): Scene
+  + toggleEvidence(evidenceId, isSuspicious): Void
+  + forkReplaySession(forkSceneId): Attempt
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  AWAITING_FINAL_DECISION
+  COMPLETED
+  ABANDONED
+}
+
+class AttemptDecision {
+  - id: String
+  - attemptId: String
+  - sceneId: String
+  - choiceId: String
+  - qualityScore: Integer
+  - feedbackText: String
+  - createdAt: DateTime
+}
+
+class EvidenceSelection {
+  - id: String
+  - attemptId: String
+  - evidenceId: String
+  - selectedAsSuspicious: Boolean
+  - isCorrect: Boolean
+  - scoreAwarded: Float
+  - createdAt: DateTime
+}
+
+class ScoringService <<Service>> {
+  + calculateDecisionScore(decisions): Float
+  + evaluateEvidenceSelection(selected, isLegit, pts): Evaluation
+  + calculateEvidenceScore(selections, total): Float
+  + computeTotalScore(decisionScore, evidenceScore): ScoreSummary
+}
+
+class GraphValidatorService <<Service>> {
+  + validateScenarioForPublication(graphData): ValidationResult
+  - checkAcyclicDfs(adjList): Boolean
+  - checkTerminalReachability(adjList, terminals): Boolean
+}
+
+User "1" -- "0..*" Attempt : initiates >
+User "1" -- "1" UserRole
+Scenario "1" -- "1..*" ScenarioVersion : tracks >
+Scenario "1" -- "1" ScenarioStatus
+Scenario "1" -- "1" ScenarioDifficulty
+
+ScenarioVersion "1" -- "1..*" Scene : defines >
+ScenarioVersion "1" -- "0..*" Evidence : contains >
+ScenarioVersion "1" -- "1..*" Choice : connects >
+
+Scene "1" -- "0..*" Choice : originatesFrom <
+Scene "1" -- "0..*" Choice : pointsTo <
+Scene "1" -- "0..*" Evidence : exhibits >
+
+Attempt "1" -- "0..*" AttemptDecision : records >
+Attempt "1" -- "0..*" EvidenceSelection : captures >
+Attempt "0..1" -- "0..*" Attempt : parentOf (Practice Replay) >
+Attempt "1" -- "1" AttemptStatus
+
+AttemptDecision "1" -- "1" Choice : refersTo >
+EvidenceSelection "1" -- "1" Evidence : references >
+
+Attempt ..> ScoringService : invokes >
+ScenarioVersion ..> GraphValidatorService : validatedBy >
+
+@enduml

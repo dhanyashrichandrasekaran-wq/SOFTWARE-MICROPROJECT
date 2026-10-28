@@ -1,0 +1,6 @@
+{
+  "name": "ScamQuest: Scenario-Based Scam Awareness",
+  "description": "An interactive, scenario-based digital scam awareness and training system with simulated inbox investigations, branching consequences, and alternate outcome replay.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

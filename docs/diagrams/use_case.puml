@@ -1,0 +1,56 @@
+@startuml
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam handwritten false
+
+left to right direction
+
+actor "Student Investigator" as Student
+actor "Security Administrator" as Admin
+
+rectangle "ScamQuest System Boundary" {
+  usecase "UC-01: Register Student Account" as UC_Register
+  usecase "UC-02: Authenticate & Log In" as UC_Login
+  usecase "UC-03: Browse & Filter Scenarios" as UC_Browse
+  usecase "UC-04: Investigate Simulated Message" as UC_Investigate
+  usecase "UC-05: Inspect Plain-Text URL / Dossier" as UC_Inspect
+  usecase "UC-06: Tag Clues as Suspicious/Legitimate" as UC_Evidence
+  usecase "UC-07: Submit Confidence Rating (1-5)" as UC_Confidence
+  usecase "UC-08: Execute Branching Decision" as UC_Decision
+  usecase "UC-09: Review Authoritative Score Breakdown" as UC_Score
+  usecase "UC-10: Explore Alternate Practice Replay" as UC_Replay
+  usecase "UC-11: Resume In-Progress Case" as UC_Resume
+  usecase "UC-12: Author & Edit Scenario Drafts" as UC_EditScenario
+  usecase "UC-13: Validate Scenario Graph Integrity" as UC_Validate
+  usecase "UC-14: Publish Validated Scenario" as UC_Publish
+  usecase "UC-15: Archive Scenario (Preserve History)" as UC_Archive
+  usecase "UC-16: Monitor Cohort Diagnostics & Telemetry" as UC_Analytics
+}
+
+Student --> UC_Register
+Student --> UC_Login
+Student --> UC_Browse
+Student --> UC_Investigate
+Student --> UC_Inspect
+Student --> UC_Evidence
+Student --> UC_Confidence
+Student --> UC_Decision
+Student --> UC_Score
+Student --> UC_Replay
+Student --> UC_Resume
+
+Admin --> UC_Login
+Admin --> UC_EditScenario
+Admin --> UC_Validate
+Admin --> UC_Publish
+Admin --> UC_Archive
+Admin --> UC_Analytics
+
+UC_Decision ..> UC_Confidence : <<include>>
+UC_Publish ..> UC_Validate : <<include>>
+UC_Replay ..> UC_Score : <<extend>>
+UC_Inspect ..> UC_Investigate : <<extend>>
+UC_Evidence ..> UC_Investigate : <<include>>
+
+@enduml
