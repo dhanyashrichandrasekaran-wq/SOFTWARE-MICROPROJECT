@@ -1,0 +1,104 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam lineThickness 1
+skinparam roundcorner 12
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam dpi 160
+hide empty members
+title ScamQuest - Class Diagram
+skinparam nodesep 45
+skinparam ranksep 55
+class User {
+  - id: Integer
+  - name: String
+  - email: String
+  - passwordHash: String
+  - role: UserRole
+  + authenticate(): Boolean
+}
+class Scenario {
+  - id: Integer
+  - title: String
+  - category: String
+  - archived: Boolean
+  + archive(): void
+}
+class ScenarioVersion {
+  - id: Integer
+  - versionNumber: Integer
+  - publicationStatus: String
+  + validate(): ValidationResult
+  + publish(): void
+}
+class Scene {
+  - id: Integer
+  - content: String
+  - isTerminal: Boolean
+}
+class Choice {
+  - id: Integer
+  - text: String
+  - decisionPoints: Decimal
+  - explanation: String
+}
+class Evidence {
+  - id: Integer
+  - description: String
+  - category: String
+  - evidencePoints: Decimal
+}
+class Attempt {
+  - id: Integer
+  - status: AttemptStatus
+  - score: Decimal
+  - confidence: Integer
+  + submitDecision(choiceId): void
+  + resume(): Scene
+  + complete(): Decimal
+  + abandon(): void
+}
+class AttemptDecision {
+  - id: Integer
+  - selectedAt: DateTime
+  - awardedPoints: Decimal
+}
+class EvidenceSelection {
+  - id: Integer
+  - selectedAt: DateTime
+}
+class ReplaySession {
+  - id: Integer
+  - startedAt: DateTime
+  + chooseAlternative(choiceId): Scene
+}
+User "1" -- "0..*" Attempt : owns
+Scenario "1" *-- "1..*" ScenarioVersion : versions
+ScenarioVersion "1" *-- "1..*" Scene : scenes
+ScenarioVersion "1" --> "1" Scene : start scene
+ScenarioVersion "1" *-- "0..*" Evidence : evidence
+Scene "0..*" -- "0..*" Evidence : reveals
+Scene "1" *-- "0..*" Choice : choices
+Choice "0..*" --> "1" Scene : next scene
+ScenarioVersion "1" -- "0..*" Attempt : attempted version
+Attempt "0..*" --> "1" Scene : current scene
+Attempt "1" *-- "0..*" AttemptDecision
+AttemptDecision "0..*" --> "1" Choice : selected choice
+Attempt "1" *-- "0..*" EvidenceSelection
+EvidenceSelection "0..*" --> "1" Evidence : selected evidence
+Attempt "1" -- "0..*" ReplaySession : practice from
+ReplaySession "0..*" --> "1" Scene : current scene
+note bottom of ReplaySession
+Only completed attempts can start replay.
+Replay never modifies the official attempt.
+end note
+note bottom of ScenarioVersion
+Published versions are immutable.
+All choice targets belong to the same version.
+Terminal scenes contain no choices.
+end note
+@enduml

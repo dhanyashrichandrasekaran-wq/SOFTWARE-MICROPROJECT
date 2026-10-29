@@ -1,0 +1,52 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam lineThickness 1
+skinparam roundcorner 12
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam dpi 160
+hide empty members
+title ScamQuest - Submit Decision Sequence Diagram
+actor Student
+boundary "React Interface" as UI
+control "Express API" as API
+database "SQLite Database" as DB
+Student -> UI : Select choice
+UI -> API : POST decision(attemptId, choiceId, requestId)
+activate API
+API -> API : Validate session and request fields
+API -> DB : Load attempt, scene and selected choice
+DB --> API : Current data
+API -> API : Check ownership, state and choice membership
+alt Invalid request or unauthorized access
+  API --> UI : Error; no progress update
+  UI --> Student : Display understandable error
+else Valid request
+  API -> DB : Begin transaction; check requestId
+  alt Decision already recorded
+    DB --> API : Previously recorded result
+    API -> DB : End transaction without changes
+    API --> UI : Return saved result; no duplicate points
+  else New decision
+    API -> API : Determine next scene and scoring update
+    API -> DB : Save decision and update progress
+    opt Final decision completes attempt
+      API -> API : Normalize score and prepare feedback
+      API -> DB : Save score and Completed state
+    end
+    API -> DB : Commit transaction
+    DB --> API : Commit confirmed
+    API --> UI : Next scene or completed feedback
+  end
+  UI --> Student : Display saved result
+end
+deactivate API
+note over API, DB
+Commit failures roll back the transaction.
+The client cannot supply the official score.
+end note
+@enduml

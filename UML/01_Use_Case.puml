@@ -1,0 +1,49 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam lineThickness 1
+skinparam roundcorner 12
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam dpi 160
+hide empty members
+left to right direction
+title ScamQuest - Use Case Diagram
+actor Student
+actor Administrator as Admin
+rectangle "ScamQuest Training System" {
+  usecase "Log in" as Login
+  usecase "Browse published\nscenarios" as Browse
+  usecase "Investigate scenario" as Investigate
+  usecase "Inspect evidence" as Inspect
+  usecase "Submit decision" as Decide
+  usecase "View score and feedback" as Feedback
+  usecase "Resume attempt" as Resume
+  usecase "Replay alternate outcome" as Replay
+  usecase "Create / edit draft scenario" as Manage
+  usecase "Validate scenario" as Validate
+  usecase "Publish scenario" as Publish
+  usecase "Archive scenario" as Archive
+  usecase "View aggregate results" as Results
+}
+Student --> Login
+Student --> Browse
+Student --> Investigate
+Student --> Inspect
+Student --> Decide
+Student --> Feedback
+Student --> Resume
+Student --> Replay
+Admin --> Login
+Admin --> Manage
+Admin --> Publish
+Admin --> Validate
+Admin --> Archive
+Admin --> Results
+Publish ..> Validate : <<include>>
+note "Replay requires a completed attempt.\nPractice does not change official results." as ReplayRule
+
+@enduml

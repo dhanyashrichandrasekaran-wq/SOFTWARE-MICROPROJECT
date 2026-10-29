@@ -1,0 +1,42 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam lineThickness 1
+skinparam roundcorner 12
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam dpi 160
+hide empty members
+title ScamQuest - Attempt State Machine Diagram
+hide empty description
+state Created
+state InProgress {
+}
+InProgress : submitChoice [valid, more scenes] / save and advance
+InProgress : resume / restore saved progress
+state AwaitingFinalDecision {
+}
+AwaitingFinalDecision : resume / restore saved progress
+state Completed
+state Abandoned
+[*] --> Created : createAttempt [published version]
+Created --> InProgress : start / load initial scene
+InProgress --> AwaitingFinalDecision : reachFinalDecision / save progress
+AwaitingFinalDecision --> Completed : submitFinalDecision [valid choice and confidence 1..5]\n/ save decision and official score
+Created --> Abandoned : abandon
+InProgress --> Abandoned : abandon
+AwaitingFinalDecision --> Abandoned : abandon
+Completed --> [*]
+Abandoned --> [*]
+note right of InProgress
+Rejected requests leave the state unchanged.
+Disconnecting does not abandon an attempt.
+end note
+note right of Completed
+Replay creates a separate ReplaySession.
+It does not reopen or modify this attempt.
+end note
+@enduml

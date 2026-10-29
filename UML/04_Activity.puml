@@ -1,0 +1,46 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam lineThickness 1
+skinparam roundcorner 12
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam dpi 160
+hide empty members
+title ScamQuest - Investigation Activity Diagram
+start
+:Log in;
+:Select a published scenario\nor resume an unfinished attempt;
+:Load saved / initial scene;
+repeat
+  :Inspect message and available evidence;
+  if (Final decision point?) then (yes)
+    :Enter confidence rating (1 to 5);
+  endif
+  :Select and submit a choice;
+  :Validate ownership, attempt state,\nchoice and required confidence;
+  while (Request valid?) is (no)
+    :Display error without changing progress;
+    :Correct input and resubmit;
+    :Validate request again;
+  endwhile (yes)
+  :Save decision and progress atomically;
+  if (Terminal outcome reached?) then (no)
+    :Load next scene;
+  endif
+repeat while (More decisions remain?) is (yes) not (no)
+:Calculate normalized score;
+:Mark attempt Completed;
+:Display outcome, score and explanations;
+if (Explore alternate outcome?) then (yes)
+  :Create separate practice replay session;
+  :Select an earlier decision;
+  :Choose an alternative and explore its branch;
+  :Display practice outcome;
+endif
+:Keep official attempt and score unchanged;
+stop
+@enduml
